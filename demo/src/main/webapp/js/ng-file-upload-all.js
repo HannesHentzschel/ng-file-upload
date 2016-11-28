@@ -2310,7 +2310,7 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
       }
       if (isDisabled() || !upload.shouldUpdateOn('paste', attr, scope)) return;
       var files = [];
-      var clipboard = evt.clipboardData || evt.originalEvent.clipboardData;
+      var clipboard = evt.clipboardData || (evt.originalEvent && evt.originalEvent.clipboardData);
       if (clipboard && clipboard.items) {
         for (var k = 0; k < clipboard.items.length; k++) {
           if (clipboard.items[k].type.indexOf('image') !== -1) {
