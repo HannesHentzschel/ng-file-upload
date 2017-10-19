@@ -2240,7 +2240,7 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
     var actualDragOverClass;
     var draggingCounter=0;
 
-    elem[0].addEventListener('dragover', function (evt) {
+    function dragoverH(evt) {
       if (isDisabled() || !upload.shouldUpdateOn('drop', attr, scope)) return;
       evt.preventDefault();
       if (stopPropagation(scope)) evt.stopPropagation();
@@ -2258,14 +2258,15 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
           attrGetter('ngfDrag', scope, {$isDragging: true, $class: actualDragOverClass, $event: evt});
         });
       }
-    }, false);
-    elem[0].addEventListener('dragenter', function (evt) {
+    }
+
+    function dragenterH(evt) {
       if (isDisabled() || !upload.shouldUpdateOn('drop', attr, scope)) return;
       draggingCounter++;
       evt.preventDefault();
       if (stopPropagation(scope)) evt.stopPropagation();
-    }, false);
-    elem[0].addEventListener('dragleave', function (evt) {
+    }
+    function dragleaveH(evt) {
       if (isDisabled() || !upload.shouldUpdateOn('drop', attr, scope)) return;
       evt.preventDefault();
       draggingCounter--;
@@ -2277,8 +2278,9 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
         actualDragOverClass = null;
         attrGetter('ngfDrag', scope, {$isDragging: false, $event: evt});
       }, dragOverDelay || 100);
-    }, false);
-    elem[0].addEventListener('drop', function (evt) {
+    }
+
+    function dropH(evt) {
       draggingCounter=0;
       if (isDisabled() || !upload.shouldUpdateOn('drop', attr, scope)) return;
       evt.preventDefault();
@@ -2302,8 +2304,9 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
           });
         }
       });
-    }, false);
-    elem[0].addEventListener('paste', function (evt) {
+    }
+
+    function pasteH(evt) {
       if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1 &&
         attrGetter('ngfEnableFirefoxPaste', scope)) {
         evt.preventDefault();
@@ -2325,7 +2328,21 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
           updateModel(files, evt);
         });
       }
-    }, false);
+    }
+
+    elem[0].addEventListener('dragover', dragoverH, false);
+    elem[0].addEventListener('dragenter', dragenterH, false);
+    elem[0].addEventListener('dragleave', dragleaveH, false);
+    elem[0].addEventListener('drop', dropH, false);
+    elem[0].addEventListener('paste', pasteH, false);
+
+    scope.$on('$destroy',function(){
+      elem[0].removeEventListener('dragover', dragoverH, false);
+      elem[0].removeEventListener('dragenter', dragenterH, false);
+      elem[0].removeEventListener('dragleave', dragleaveH, false);
+      elem[0].removeEventListener('drop', dropH, false);
+      elem[0].removeEventListener('paste', pasteH, false);
+    });
 
     if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1 &&
       attrGetter('ngfEnableFirefoxPaste', scope)) {
@@ -2334,6 +2351,9 @@ ngFileUpload.service('UploadResize', ['UploadValidate', '$q', function (UploadVa
         if (!e.metaKey && !e.ctrlKey) {
           e.preventDefault();
         }
+      });
+      scope.$on('$destroy',function(){
+        elem.off('keypress');
       });
     }
 
