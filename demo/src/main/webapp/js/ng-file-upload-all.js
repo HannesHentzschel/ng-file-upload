@@ -1303,14 +1303,7 @@ ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile', 'Upload',
       return val;
     });
 
-    scope.$on('$destroy', function () {
-      if (!isInputTypeFile()) fileElem.parent().remove();
-      angular.forEach(unwatches, function (unwatch) {
-        unwatch();
-      });
-    });
-
-    $timeout(function () {
+    function cleanElements() {
       for (var i = 0; i < generatedElems.length; i++) {
         var g = generatedElems[i];
         if (!document.body.contains(g.el[0])) {
@@ -1318,7 +1311,15 @@ ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile', 'Upload',
           g.ref.remove();
         }
       }
+    }
+    scope.$on('$destroy', function () {
+      if (!isInputTypeFile()) fileElem.parent().remove();
+      angular.forEach(unwatches, function (unwatch) {
+        unwatch();
+      });
+      $timeout(cleanElements);
     });
+    $timeout(cleanElements);
 
     if (window.FileAPI && window.FileAPI.ngfFixIE) {
       window.FileAPI.ngfFixIE(elem, fileElem, changeFn);
